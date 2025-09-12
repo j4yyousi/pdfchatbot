@@ -9,4 +9,4 @@ class HomeViewTest(TestCase):
         http_response: HttpResponse = self.client.get("/")
         self.assertEqual(http_response.status_code, OK)
         response = BeautifulSoup(http_response.content, "html.parser")
-        self.assertIn("PDF Q/A Chatbot", response.title.string)
+        self.assertIn("PDF Q&A Chatbot", response.title.string)
