@@ -8,6 +8,6 @@
     <h3>Upload PDF</h3>
     <form id="upload-form" action="{% url 'home' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-
+        <input type="file" id="pdf-file" name="pdf_file" accept=".pdf" required>
     </form>
 </body>
