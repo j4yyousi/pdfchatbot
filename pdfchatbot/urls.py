@@ -15,9 +15,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, URLPattern, URLResolver
-from .views import home
+from .views import home, upload
 from typing import List, Union
 
 urlpatterns: List[Union[URLPattern, URLResolver]] = [
     path("", home, name="home"),
+    path("upload/", upload, name="upload"),
 ]

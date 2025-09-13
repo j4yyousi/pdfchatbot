@@ -1,11 +1,4 @@
-from django.test import TestCase
-from django.http import HttpResponse
-from bs4 import BeautifulSoup, Tag
-from bs4.element import PageElement
-from typing import Optional
-from django.urls import reverse
-from ..constants import IDS
-from http import HTTPStatus
+from .utils import *
 
 class HomeViewTest(TestCase):
     def setUp(self) -> None:
@@ -18,7 +11,7 @@ class HomeViewTest(TestCase):
         #if title is None and string is accessed. Also to get rid of pylance errors.
         title: Optional[Tag] = self.response.title
         if isinstance(title, Tag):
-            self.assertEqual("PDF Q&A Chatbot", title.string)
+            self.assertEqual(TITLE, title.string)
         else:
             self.fail("title not found")
 
@@ -27,7 +20,7 @@ class HomeViewTest(TestCase):
         if isinstance(form_elem, Tag):
             self.assertEqual(form_elem.get("method"), "post")
             self.assertEqual(form_elem.get("enctype"), "multipart/form-data")
-            self.assertEqual(form_elem.get("action"), reverse('home'))
+            self.assertEqual(form_elem.get("action"), reverse('upload'))
         else:
             self.fail(f"{IDS["pdf_upload_form"]} not found")
 
