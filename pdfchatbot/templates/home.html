@@ -9,5 +9,6 @@
     <form id="{{ ids.pdf_upload_form }}" action="{% url 'home' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" id="{{ ids.pdf_input }}" name="{{ ids.pdf_input }}" accept=".pdf" required>
+        <button type="submit" id="{{ ids.upload_pdf_btn }}">Upload PDF</button>
     </form>
 </body>
