@@ -5,5 +5,9 @@
     <title>PDF Q&A Chatbot</title>
 </head>
 <body>
-    
+    <h3>Upload PDF</h3>
+    <form id="upload-form" action="{% url 'home' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+    </form>
 </body>
