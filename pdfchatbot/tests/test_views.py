@@ -29,7 +29,7 @@ class HomeViewTest(TestCase):
             self.assertEqual(form_elem.get("enctype"), "multipart/form-data")
             self.assertEqual(form_elem.get("action"), reverse('home'))
         else:
-            self.fail("form_elem not found")
+            self.fail(f"{IDS["pdf_upload_form"]} not found")
 
     def test_choose_file_button_exists(self):
         # input_elem is either a PageElement or None.
@@ -41,4 +41,12 @@ class HomeViewTest(TestCase):
             self.assertEqual(input_elem.get("accept"), ".pdf")
             self.assertIn("required", input_elem.attrs)
         else:
-            self.fail("input_elem not found")
+            self.fail(f"{IDS["pdf_input"]} not found")
+    
+    def test_upload_pdf_button_exists(self):
+        upload_btn: Optional[PageElement] = self.response.find("button", {"id": IDS["upload_pdf_btn"]})
+        if isinstance(upload_btn, Tag):
+            self.assertEqual(upload_btn.get("type"), "submit")
+            self.assertEqual(upload_btn.string, "Upload PDF")
+        else:
+            self.fail(f"{IDS["upload_pdf_btn"]} not found")
