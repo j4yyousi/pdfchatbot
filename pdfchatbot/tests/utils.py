@@ -6,3 +6,4 @@ from typing import Optional
 from django.urls import reverse
 from ..constants import IDS, TITLE
 from http import HTTPStatus
+from typing import cast
