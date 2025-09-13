@@ -15,6 +15,10 @@ class HomeViewTest(TestCase):
         else:
             self.fail("title not found")
 
+    def test_unimplemented_methods(self):
+        http_response: HttpResponse = self.client.post(reverse('home'))
+        self.assertEqual(http_response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
+
     def test_upload_pdf_form_exists(self) -> None:
         form_elem: Optional[PageElement] = self.response.find("form", {"id": IDS["pdf_upload_form"]})
         if isinstance(form_elem, Tag):

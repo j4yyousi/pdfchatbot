@@ -17,9 +17,13 @@ def create_test_pdf() -> SimpleUploadedFile:
     )
 
 class UploadViewTest(TestCase):
-    def test_upload_post(self):
+    def test_upload_post_redirect(self):
         #test_file: SimpleUploadedFile = create_test_pdf()
         #http_response: HttpResponse = self.client.post(reverse('upload'), {IDS["pdf_input"]: test_file})
         http_response: HttpResponse = self.client.post(reverse('upload'))
         self.assertEqual(http_response.status_code, HTTPStatus.FOUND)
+    
+    def test_unimplemented_methods(self):
+        http_response: HttpResponse = self.client.get(reverse('upload'))
+        self.assertEqual(http_response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
