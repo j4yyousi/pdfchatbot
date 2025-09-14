@@ -5,10 +5,20 @@
     <title>PDF Q&A Chatbot</title>
 </head>
 <body>
+    <!-- PDF Upload Section -->
     <h3>Upload PDF</h3>
     <form id="{{ ids.pdf_upload_form }}" action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" id="{{ ids.pdf_input }}" name="{{ ids.pdf_input }}" accept=".pdf" required>
         <button type="submit" id="{{ ids.upload_pdf_btn }}">Upload PDF</button>
     </form>
+
+    {% if file_uploaded %}
+    <!-- Main Chat Area -->
+        <div>
+            <form id="{{ ids.chat_form }}" action="{% url 'chat' %}" method="post">
+                {% csrf_token %}
+            </form>
+        </div>
+    {% endif %}
 </body>

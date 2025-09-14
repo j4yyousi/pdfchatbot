@@ -47,3 +47,7 @@ class HomeViewTest(TestCase):
             self.assertEqual(upload_btn.string, "Upload PDF")
         else:
             self.fail(f"{IDS["upload_pdf_btn"]} not found")
+    
+    def test_chat_form_does_not_exist_initially(self):
+        form_elem: Optional[PageElement] = self.response.find("form", {"id": IDS["chat_form"]})
+        self.assertIsNone(form_elem)
