@@ -66,3 +66,14 @@ class UploadViewTest(TestCase):
             self.assertIn("required", input_elem.attrs)
         else:
             self.fail(f"{IDS["chat_input"]} not found")
+
+    def test_chat_question_submit_btn_exists_after_file_upload(self):
+        self.upload_pdf()
+        self.http_response = self.client.get(reverse('home'))
+        response = BeautifulSoup(self.http_response.content, "html.parser")
+        chat_btn: Optional[PageElement] = response.find("button", {"id": IDS["chat_btn"]})
+        if isinstance(chat_btn, Tag):
+            self.assertEqual(chat_btn.get("type"), "submit")
+            self.assertEqual(chat_btn.string, "Send")
+        else:
+            self.fail(f"{IDS["chat_btn"]} not found")

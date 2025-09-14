@@ -19,6 +19,7 @@
             <form id="{{ ids.chat_form }}" action="{% url 'chat' %}" method="post">
                 {% csrf_token %}
                 <input type="text" id="chat_input" placeholder="Ask a question about the document..." required>
+                <button type="submit" id="chat_btn">Send</button>
             </form>
         </div>
     {% endif %}

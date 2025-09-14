@@ -6,4 +6,5 @@ IDS: dict[str,str] = {
     "upload_pdf_btn": "upload_pdf_btn",
     "chat_form": "chat_form",
     "chat_input": "chat_input",
+    "chat_btn": "chat_btn",
 }
