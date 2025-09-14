@@ -54,3 +54,15 @@ class UploadViewTest(TestCase):
             self.assertEqual(form_elem.get("action"), reverse('chat'))
         else:
             self.fail(f"{IDS["chat_form"]} not found")
+
+    def test_chat_input_exists_after_file_upload(self):
+        self.upload_pdf()
+        self.http_response = self.client.get(reverse('home'))
+        response = BeautifulSoup(self.http_response.content, "html.parser")
+        input_elem: Optional[PageElement] = response.find("input", {"id": IDS["chat_input"]})
+        if isinstance(input_elem, Tag):
+            self.assertEqual(input_elem.get("type"), "text")
+            self.assertEqual(input_elem.get("placeholder"), "Ask a question about the document...")
+            self.assertIn("required", input_elem.attrs)
+        else:
+            self.fail(f"{IDS["chat_input"]} not found")
