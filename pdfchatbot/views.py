@@ -23,3 +23,9 @@ def upload(request: HttpRequest) -> HttpResponse:
         #POST is the only one allowed
         return HttpResponseNotAllowed(["POST"])
 
+def chat(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        return redirect(reverse("home"))
+    else:
+        return HttpResponseNotAllowed(["POST"])
+
