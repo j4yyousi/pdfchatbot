@@ -11,7 +11,7 @@ class HomeViewTest(TestCase):
         #if title is None and string is accessed. Also to get rid of pylance errors.
         title: Optional[Tag] = self.response.title
         if isinstance(title, Tag):
-            self.assertEqual(TITLE, title.string)
+            self.assertEqual("PDF Q&A Chatbot", title.string)
         else:
             self.fail("title not found")
 
@@ -20,34 +20,34 @@ class HomeViewTest(TestCase):
         self.assertEqual(http_response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_upload_pdf_form_exists(self) -> None:
-        form_elem: Optional[PageElement] = self.response.find("form", {"id": IDS["pdf_upload_form"]})
+        form_elem: Optional[PageElement] = self.response.find("form", {"id": "pdf_upload_form"})
         if isinstance(form_elem, Tag):
             self.assertEqual(form_elem.get("method"), "post")
             self.assertEqual(form_elem.get("enctype"), "multipart/form-data")
             self.assertEqual(form_elem.get("action"), reverse('upload'))
         else:
-            self.fail(f"{IDS["pdf_upload_form"]} not found")
+            self.fail(f"pdf_upload_form not found")
 
     def test_choose_file_button_exists(self):
         # input_elem is either a PageElement or None.
-        input_elem: Optional[PageElement] = self.response.find("input", {"id": IDS["pdf_input"]})
+        input_elem: Optional[PageElement] = self.response.find("input", {"id": "pdf_input"})
         #A tag is a subclass of PageElement.
         if isinstance(input_elem, Tag):
             self.assertEqual(input_elem.get("type"), "file")
-            self.assertEqual(input_elem.get("name"), IDS["pdf_input"])
+            self.assertEqual(input_elem.get("name"), "pdf_input")
             self.assertEqual(input_elem.get("accept"), ".pdf")
             self.assertIn("required", input_elem.attrs)
         else:
-            self.fail(f"{IDS["pdf_input"]} not found")
+            self.fail(f"pdf_input not found")
     
     def test_upload_pdf_button_exists(self):
-        upload_btn: Optional[PageElement] = self.response.find("button", {"id": IDS["upload_pdf_btn"]})
+        upload_btn: Optional[PageElement] = self.response.find("button", {"id": "upload_pdf_btn"})
         if isinstance(upload_btn, Tag):
             self.assertEqual(upload_btn.get("type"), "submit")
             self.assertEqual(upload_btn.string, "Upload PDF")
         else:
-            self.fail(f"{IDS["upload_pdf_btn"]} not found")
+            self.fail(f"upload_pdf_btn not found")
     
     def test_chat_form_does_not_exist_initially(self):
-        form_elem: Optional[PageElement] = self.response.find("form", {"id": IDS["chat_form"]})
+        form_elem: Optional[PageElement] = self.response.find("form", {"id": "chat_form"})
         self.assertIsNone(form_elem)

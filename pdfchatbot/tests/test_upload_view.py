@@ -23,7 +23,7 @@ class UploadViewTest(TestCase):
         self.ref_file: SimpleUploadedFile = create_test_pdf()
         self.http_response: HttpResponse = self.client.post(
             reverse('upload'),
-            {IDS["pdf_input"]: self.ref_file}
+            {"pdf_input": self.ref_file}
         )
 
     def test_upload_post_redirect(self):
@@ -48,32 +48,32 @@ class UploadViewTest(TestCase):
         self.upload_pdf()
         self.http_response = self.client.get(reverse('home'))
         response = BeautifulSoup(self.http_response.content, "html.parser")
-        form_elem: Optional[PageElement] = response.find("form", {"id": IDS["chat_form"]})
+        form_elem: Optional[PageElement] = response.find("form", {"id": "chat_form"})
         if isinstance(form_elem, Tag):
             self.assertEqual(form_elem.get("method"), "post")
             self.assertEqual(form_elem.get("action"), reverse('chat'))
         else:
-            self.fail(f"{IDS["chat_form"]} not found")
+            self.fail(f"chat_form not found")
 
     def test_chat_input_exists_after_file_upload(self):
         self.upload_pdf()
         self.http_response = self.client.get(reverse('home'))
         response = BeautifulSoup(self.http_response.content, "html.parser")
-        input_elem: Optional[PageElement] = response.find("input", {"id": IDS["chat_input"]})
+        input_elem: Optional[PageElement] = response.find("input", {"id": "chat_input"})
         if isinstance(input_elem, Tag):
             self.assertEqual(input_elem.get("type"), "text")
             self.assertEqual(input_elem.get("placeholder"), "Ask a question about the document...")
             self.assertIn("required", input_elem.attrs)
         else:
-            self.fail(f"{IDS["chat_input"]} not found")
+            self.fail(f"chat_input not found")
 
     def test_chat_question_submit_btn_exists_after_file_upload(self):
         self.upload_pdf()
         self.http_response = self.client.get(reverse('home'))
         response = BeautifulSoup(self.http_response.content, "html.parser")
-        chat_btn: Optional[PageElement] = response.find("button", {"id": IDS["chat_btn"]})
+        chat_btn: Optional[PageElement] = response.find("button", {"id": "chat_btn"})
         if isinstance(chat_btn, Tag):
             self.assertEqual(chat_btn.get("type"), "submit")
             self.assertEqual(chat_btn.string, "Send")
         else:
-            self.fail(f"{IDS["chat_btn"]} not found")
+            self.fail(f"{"chat_btn"} not found")
