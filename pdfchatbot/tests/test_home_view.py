@@ -1,6 +1,7 @@
 from .utils import *
 
-class HomeViewTest(TestCase):
+class HomeViewTest(Base):
+
     def setUp(self) -> None:
         self.http_response: HttpResponse = self.client.get(reverse('home'))
         self.response = BeautifulSoup(self.http_response.content, "html.parser")

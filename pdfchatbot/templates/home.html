@@ -1,8 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>PDF Q&A Chatbot</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
     <!-- PDF Upload Section -->
@@ -15,12 +17,25 @@
 
     {% if file_uploaded %}
     <!-- Main Chat Area -->
-        <div>
-            <form id="chat_form" action="{% url 'chat' %}" method="post">
-                {% csrf_token %}
-                <input type="text" id="chat_input" name="chat_input" placeholder="Ask a question about the document..." required>
-                <button type="submit" id="chat_btn">Send</button>
-            </form>
-        </div>
+            {% if chat_messages %}
+                <div id="chat_messages">
+                    {% for message in messages %}
+                            <div class="message_content">
+                                {{ message.content|linebreaks }}
+                            </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div>
+                    <p>Welcome! Ask any question about the uploaded PDF document.</p>
+                </div>
+            {% endif %}
+            <div>
+                <form id="chat_form" action="{% url 'chat' %}" method="post">
+                    {% csrf_token %}
+                    <input type="text" id="chat_input" name="chat_input" placeholder="Ask a question about the document..." required>
+                    <button type="submit" id="chat_btn">Send</button>
+                </form>
+            </div>
     {% endif %}
 </body>

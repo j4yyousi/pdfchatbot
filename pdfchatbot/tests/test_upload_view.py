@@ -18,7 +18,7 @@ def create_test_pdf() -> SimpleUploadedFile:
         content_type="application/pdf"
     )
 
-class UploadViewTest(TestCase):
+class UploadViewTest(Base):
     def upload_pdf(self):
         self.ref_file: SimpleUploadedFile = create_test_pdf()
         self.http_response: HttpResponse = self.client.post(
