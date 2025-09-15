@@ -2,7 +2,6 @@ from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.urls import reverse
-from .constants import IDS
 from django.core.files.uploadedfile import UploadedFile
 from typing import Optional
 from .processpdf import process_pdf
@@ -28,7 +27,7 @@ def home(request: HttpRequest) -> HttpResponse:
 def upload(request: HttpRequest) -> HttpResponse:
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
-    file: Optional[UploadedFile] = request.FILES.get(IDS["pdf_input"]) 
+    file: Optional[UploadedFile] = request.FILES.get("pdf_input") 
     process_pdf(file)
     set_file_uploaded(True)
     return redirect("home")

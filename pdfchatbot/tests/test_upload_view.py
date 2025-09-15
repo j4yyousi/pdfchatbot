@@ -62,6 +62,7 @@ class UploadViewTest(TestCase):
         input_elem: Optional[PageElement] = response.find("input", {"id": "chat_input"})
         if isinstance(input_elem, Tag):
             self.assertEqual(input_elem.get("type"), "text")
+            self.assertEqual(input_elem.get("name"), "chat_input")
             self.assertEqual(input_elem.get("placeholder"), "Ask a question about the document...")
             self.assertIn("required", input_elem.attrs)
         else:
