@@ -52,8 +52,8 @@
                         {% if file_uploaded %}
                             {% if chat_messages %}
                                 {% for message in chat_messages %}
-                                    <div class="message-content {% if message.is_user %}user-message{% else %}bot-message{% endif %}">
-                                        <div class="message-bubble" class="check_message_content">
+                                    <div class="message-bubble {% if message.type == 'question' %}user-message{% else %}bot-message{% endif %}">
+                                        <div class="message_content">
                                             {{ message.content|linebreaks }}
                                         </div>
                                     </div>

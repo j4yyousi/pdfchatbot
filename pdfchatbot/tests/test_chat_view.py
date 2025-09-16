@@ -34,7 +34,7 @@ class ChatMessagesTest(Base):
         response = BeautifulSoup(http_response.content, "html.parser")
         div_elem: Optional[PageElement] = response.find("div", {"id": "chat_messages"})
         if isinstance(div_elem, Tag):
-            contents = [div.get_text(strip=True) for div in response.select(".check_message_content")]
+            contents = [div.get_text(strip=True) for div in response.select(".message_content")]
             self.assertNotEqual(contents, [])
             for i, message in enumerate(contents):
                 if i % 2 == 0:

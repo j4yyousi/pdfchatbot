@@ -207,7 +207,7 @@ body {
     border-radius: 3px;
 }
 
-.message-content {
+.message-bubble {
     display: flex;
     margin-bottom: 15px;
 }
@@ -220,26 +220,26 @@ body {
     justify-content: flex-end;
 }
 
-.message-bubble {
+.message_content {
     max-width: 70%;
     padding: 15px 20px;
     border-radius: 18px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.bot-message .message-bubble {
-    background: rgba(255, 255, 255, 0.95);
-    color: #2d3748;
+.bot-message .message_content {
+    background: #3f7c02;
+    color: #ffffff;
     border-bottom-left-radius: 6px;
 }
 
-.user-message .message-bubble {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+.user-message .message_content {
+    background: #0488ed;
+    color: rgb(255, 255, 255);
     border-bottom-right-radius: 6px;
 }
 
-.welcome-message .message-bubble {
+.welcome-message .message_content {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
@@ -327,7 +327,7 @@ body {
         font-size: 24px;
     }
 
-    .message-bubble {
+    .message_content {
         max-width: 85%;
     }
 }
