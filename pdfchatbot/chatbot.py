@@ -152,14 +152,20 @@ if not TESTING:
     chatbot = ChatBot()
 
 def chatbot_is_file_uploaded() -> bool:
+    if TESTING:
+        return False
     global chatbot
     return chatbot.is_file_uploaded
 
 def chatbot_process_pdf(file: TemporaryUploadedFile | InMemoryUploadedFile) -> None:
+    if TESTING:
+        return
     global chatbot
     chatbot.create_vector_db_from_pdf(file)
 
 def chatbot_answer(question: str) -> str:
+    if TESTING:
+        return "test answer"
     global chatbot
     answer = chatbot.answer_with_rag(question)
     return answer

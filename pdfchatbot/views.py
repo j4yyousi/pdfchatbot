@@ -16,11 +16,6 @@ def get_messages():
     global messages
     return messages
 
-def set_file_uploaded(val):
-    global file_uploaded
-    file_uploaded = val
-    print(f"file_uploaded set to = {file_uploaded}")
-
 def get_file_uploaded():
     global file_uploaded
     print(f"got file_uploaded = {file_uploaded}")
