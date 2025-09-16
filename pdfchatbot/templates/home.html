@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
+    <!-- loading spinning wheel -->
+    <div class="loading-overlay" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
     <!-- PDF Upload Section -->
     <h3>Upload PDF</h3>
     <form id="pdf_upload_form" action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
@@ -20,8 +24,8 @@
         <div id="file_name">Uploaded {{ file_name }}</div>
             {% if chat_messages %}
                 <div id="chat_messages">
-                    {% for message in messages %}
-                            <div class="message_content">
+                    {% for message in chat_messages %}
+                            <div class="check_message_content">
                                 {{ message.content|linebreaks }}
                             </div>
                     {% endfor %}
@@ -41,4 +45,25 @@
     {% else %}
         <div id="file_name">No PDF uploaded yet.</div>
     {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadForm = document.getElementById('pdf_upload_form');
+            const chatForm = document.getElementById('chat_form');
+            const loadingSpinner = document.getElementById('loading-spinner');
+
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', function(event) {
+                    loadingSpinner.style.display = 'flex';
+                });
+            }
+
+            if (chatForm) {
+                chatForm.addEventListener('submit', function(event) {
+                    loadingSpinner.style.display = 'flex';
+                });
+            }
+        });
+    </script>
 </body>
+</html>

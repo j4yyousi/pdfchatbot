@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Q&A Chatbot</title>
+    <link rel="stylesheet" href="{% static 'style_turbo.css' %}">
+</head>
+<body>
+    <div class="loading-overlay" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+    <div class="container">
+        <!-- Left Sidebar - PDF Upload Section -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <h2 class="sidebar-title">PDF Upload</h2>
+                <form id="pdf_upload_form" action="{% url 'upload' %}" method="post" enctype="multipart/form-data" class="upload-form">
+                    {% csrf_token %}
+                    <div class="file-input-wrapper">
+                        <input type="file" id="pdf_input" name="pdf_input" accept=".pdf" required class="file-input">
+                        <label for="pdf_input" class="file-input-label">
+                            <span class="file-icon">📄</span>
+                            Choose PDF File
+                        </label>
+                    </div>
+                    <button type="submit" id="upload_pdf_btn" class="upload-btn">Upload PDF</button>
+                </form>
+                
+                <div class="upload-status">
+                    {% if file_uploaded %}
+                        <div id="file_name" class="file-status">✅ Uploaded: {{ file_name }}</div>
+                    {% else %}
+                        <div id="file_name" class="file-status">
+                            No PDF uploaded yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area - Chat -->
+        <main class="main-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h1>PDF Q&A Assistant</h1>
+                    <p class="chat-subtitle">Ask questions about your uploaded document</p>
+                </div>
+                
+                <div class="chat-messages-wrapper">
+                    <div id="chat_messages" class="chat-messages">
+                        {% if file_uploaded %}
+                            {% if chat_messages %}
+                                {% for message in chat_messages %}
+                                    <div class="message-content {% if message.is_user %}user-message{% else %}bot-message{% endif %}">
+                                        <div class="message-bubble" class="check_message_content">
+                                            {{ message.content|linebreaks }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="welcome-message">
+                                    <div class="message-content bot-message">
+                                        <div class="message-bubble">
+                                            <p>🎉 Great! Your PDF has been uploaded successfully. Ask me any question about the document and I'll help you find the answers.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="welcome-message">
+                                <div class="message-content bot-message">
+                                    <div class="message-bubble">
+                                        <p>👋 Welcome! Please upload a PDF document using the sidebar, and I'll help you answer questions about it.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if file_uploaded %}
+                <div class="chat-input-section">
+                    <form id="chat_form" action="{% url 'chat' %}" method="post" class="chat-form">
+                        {% csrf_token %}
+                        <div class="input-wrapper">
+                            <input type="text" id="chat_input" name="chat_input" 
+                                   placeholder="Ask a question about the document..." 
+                                   required class="chat-input">
+                            <button type="submit" id="chat_btn" class="chat-send-btn">
+                                <span class="send-icon">➤</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% else %}
+                <div class="chat-input-section">
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="Upload a PDF first to start chatting..." 
+                               disabled class="chat-input" style="opacity: 0.6;">
+                        <button type="button" class="chat-send-btn" disabled style="opacity: 0.6;">
+                            <span class="send-icon">➤</span>
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadForm = document.getElementById('pdf_upload_form');
+        const chatForm = document.getElementById('chat_form');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function(event) {
+                loadingSpinner.style.display = 'flex';
+            });
+        }
+
+        if (chatForm) {
+            chatForm.addEventListener('submit', function(event) {
+                loadingSpinner.style.display = 'flex';
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

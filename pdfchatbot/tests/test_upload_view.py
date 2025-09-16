@@ -38,7 +38,7 @@ class UploadViewTest(Base):
         response = BeautifulSoup(self.http_response.content, "html.parser")
         div_elem: Optional[PageElement] = response.find("div", {"id": "file_name"})
         if isinstance(div_elem, Tag):
-            self.assertEqual(div_elem.get_text(), "Uploaded " + self.ref_file.name)
+            self.assertEqual(div_elem.get_text(), "✅ Uploaded: " + self.ref_file.name)
         else:
             self.fail(f"div_elem not found")
 
@@ -64,6 +64,5 @@ class UploadViewTest(Base):
         chat_btn: Optional[PageElement] = response.find("button", {"id": "chat_btn"})
         if isinstance(chat_btn, Tag):
             self.assertEqual(chat_btn.get("type"), "submit")
-            self.assertEqual(chat_btn.string, "Send")
         else:
             self.fail(f"{"chat_btn"} not found")

@@ -21,10 +21,10 @@ def home(request: HttpRequest) -> HttpResponse:
     #GET is the only one allowed
     if request.method != "GET":
         return HttpResponseNotAllowed(["GET"])
-    return render(request, "home.html", {"file_uploaded": chatbot_is_file_uploaded(),
+    return render(request, "home_turbo.html", {"file_uploaded": chatbot_is_file_uploaded(),
                                          "file_name": chatbot_get_file_name(),
-                                         "chat_messages": messages != [],
-                                         "messages": messages}) 
+                                         "chat_messages": messages}
+                                        )
 
 def upload(request: HttpRequest) -> HttpResponse:
     if request.method != "POST":
