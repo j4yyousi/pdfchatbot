@@ -17,6 +17,7 @@
 
     {% if file_uploaded %}
     <!-- Main Chat Area -->
+        <div id="file_name">Uploaded {{ file_name }}</div>
             {% if chat_messages %}
                 <div id="chat_messages">
                     {% for message in messages %}
@@ -37,5 +38,7 @@
                     <button type="submit" id="chat_btn">Send</button>
                 </form>
             </div>
+    {% else %}
+        <div id="file_name">No PDF uploaded yet.</div>
     {% endif %}
 </body>

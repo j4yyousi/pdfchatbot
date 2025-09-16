@@ -32,6 +32,17 @@ class UploadViewTest(Base):
             self.fail(f"chat_form not found")
 
     @mock.patch("pdfchatbot.views.chatbot_is_file_uploaded", return_value=True)
+    def test_file_name_exists_after_file_upload(self, cifu):
+        self.upload_pdf()
+        self.http_response = self.client.get(reverse('home'))
+        response = BeautifulSoup(self.http_response.content, "html.parser")
+        div_elem: Optional[PageElement] = response.find("div", {"id": "file_name"})
+        if isinstance(div_elem, Tag):
+            self.assertEqual(div_elem.get_text(), "Uploaded " + self.ref_file.name)
+        else:
+            self.fail(f"div_elem not found")
+
+    @mock.patch("pdfchatbot.views.chatbot_is_file_uploaded", return_value=True)
     def test_chat_input_exists_after_file_upload(self, cifu):
         self.upload_pdf()
         self.http_response = self.client.get(reverse('home'))

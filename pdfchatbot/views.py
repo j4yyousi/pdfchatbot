@@ -3,7 +3,8 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.core.files.uploadedfile import UploadedFile
 from typing import Optional
-from .chatbot import chatbot_is_file_uploaded, chatbot_process_pdf, chatbot_answer
+from .chatbot import chatbot_is_file_uploaded, chatbot_process_pdf,\
+                     chatbot_answer, chatbot_get_file_name
 
 file_uploaded = False
 messages: list[dict[str,str]] = list()
@@ -16,19 +17,12 @@ def get_messages():
     global messages
     return messages
 
-def get_file_uploaded():
-    global file_uploaded
-    print(f"got file_uploaded = {file_uploaded}")
-    return file_uploaded
-
-def get_answer():
-    return "take this for now"
-
 def home(request: HttpRequest) -> HttpResponse:
     #GET is the only one allowed
     if request.method != "GET":
         return HttpResponseNotAllowed(["GET"])
     return render(request, "home.html", {"file_uploaded": chatbot_is_file_uploaded(),
+                                         "file_name": chatbot_get_file_name(),
                                          "chat_messages": messages != [],
                                          "messages": messages}) 
 

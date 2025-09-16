@@ -8,7 +8,7 @@ from langchain_community.vectorstores.utils import DistanceStrategy
 from torch import bfloat16
 from django.core.files.uploadedfile import TemporaryUploadedFile , InMemoryUploadedFile
 from PyPDF2 import PdfReader
-from .settings import TESTING
+from .settings import UNIT_TESTING
 
 class ChatBot():
     def __init__(self) -> None:
@@ -148,23 +148,29 @@ Question: {question}""",
 
         return answer
 
-if not TESTING:
+if not UNIT_TESTING:
     chatbot = ChatBot()
 
 def chatbot_is_file_uploaded() -> bool:
-    if TESTING:
+    if UNIT_TESTING:
         return False
     global chatbot
     return chatbot.is_file_uploaded
 
+def chatbot_get_file_name() -> str:
+    if UNIT_TESTING:
+        return "test.pdf"
+    global chatbot
+    return chatbot.file_name
+
 def chatbot_process_pdf(file: TemporaryUploadedFile | InMemoryUploadedFile) -> None:
-    if TESTING:
+    if UNIT_TESTING:
         return
     global chatbot
     chatbot.create_vector_db_from_pdf(file)
 
 def chatbot_answer(question: str) -> str:
-    if TESTING:
+    if UNIT_TESTING:
         return "test answer"
     global chatbot
     answer = chatbot.answer_with_rag(question)
