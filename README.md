@@ -11,6 +11,7 @@ sudo docker build -t pdfchatbot . && sudo docker run \
   -e EMBEDDING_MODEL_NAME=models/gemini-embedding-001 \
   -it pdfchatbot
 ```
+You can get a [gemini api key from here](https://ai.google.dev/gemini-api/docs/quickstart)
 ## Project Architecture
 
 ![Project Architecture Diagram](media/RAG_workflow.png)
