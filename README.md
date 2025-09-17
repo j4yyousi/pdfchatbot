@@ -1,8 +1,16 @@
 ## How To Install
-In Docker setup file:  
-gemini llm model name  
-gemini embeddings model name  
-gemini api_key
+Assuming you have docker, git and runing Ubunbtu, ``git clone` this repository then `cd` to project directory and run the following command, make sure `GEMINI_API_KEY` is set to your key:
+
+```
+sudo docker build -t pdfchatbot . && sudo docker run \
+  -p 8000:8000 \
+  -e DEBUG=False \
+  -e DJANGO_SECRET_KEY=sekrit \
+  -e GEMINI_API_KEY=your_api_key \
+  -e LLM_MODEL_NAME=gemini-2.5-flash \
+  -e EMBEDDING_MODEL_NAME=models/gemini-embedding-001 \
+  -it pdfchatbot
+```
 ## Project Architecture
 
 ![Project Architecture Diagram](media/RAG_workflow.png)
@@ -10,7 +18,7 @@ gemini api_key
 
 ## Demo
 
-
+![project Demo](media/pdfchatbot_demo.gif)
 
 ## API Documentation
 
@@ -66,9 +74,13 @@ Without tokenizer the performence gets worse.
 
 Tested on PDFs of 300*50 = 15k characters
 
-## Some Useful Commands
+## Some Useful Linux Commands
 
-to unit test: `UNIT_TESTING=TRUE ./manage.py test`
+to unit test: `UNIT_TESTING=TRUE ./manage.py test`  
+to find built containers: `sudo docker ps --all`  
+to open terminal in container and debug: `sudo docker exec -it container_name bash`  
+to delete a container `sudo docker rm container_name`
+
 
 ## Future work
 1. [Test chatbot by building an evaluation system](https://huggingface.co/learn/cookbook/en/rag_evaluation) 
