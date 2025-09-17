@@ -9,6 +9,129 @@ from torch import bfloat16
 from django.core.files.uploadedfile import TemporaryUploadedFile , InMemoryUploadedFile
 from PyPDF2 import PdfReader
 from .settings import UNIT_TESTING
+import google.generativeai as genai
+import os
+
+class ChatBotCloud():
+    def __init__(self) -> None:
+        genai.configure(api_key=os.environ.get('API_KEY'))
+        self.file_name: str = ""
+        self.vector_db: VectorStore
+        self.chunk_size_in_tokens: int = 200
+        self.EMBEDDING_MODEL_NAME = "thenlper/gte-small"
+        self.prompt_template = [
+        {
+        "role": "system",
+        "content": """Using the information contained in the context,
+give a comprehensive answer to the question.
+Respond only to the question asked, response should be short and relevant to the question.
+If the answer cannot be deduced from the context, do not give an answer. Do not mention the context.""",
+        },
+        {
+        "role": "user",
+        "content": """Context: 
+{context}
+---
+Now here is the question you need to answer. Keep your answers short.
+
+Question: {question}""",
+        },
+        ]
+
+
+        READER_MODEL_NAME = "HuggingFaceH4/zephyr-7b-beta"
+        print("loading tokenizer...")
+        self.tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(READER_MODEL_NAME)
+        print("loading pipeline...")
+
+
+        self.rag_prompt_template = self.tokenizer.apply_chat_template(  # type: ignore
+            self.prompt_template, tokenize=False, add_generation_prompt=True
+        )
+
+        print("loading embedding model...")
+        self.embedding_model = HuggingFaceEmbeddings(
+        model_name=self.EMBEDDING_MODEL_NAME,
+        multi_process=True,
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True},
+        )
+
+    @property
+    def is_file_uploaded(self) -> bool:
+        return bool(self.file_name)
+
+    def convert_to_document(self, file: TemporaryUploadedFile | InMemoryUploadedFile) -> list[Document]:
+        raw_knowledge_base: list[Document] = []
+        self.file_name = file.name
+        reader = PdfReader(file)
+        for i in range(len(reader.pages)):
+            raw_knowledge_base.append(Document(page_content=reader.pages[i].extract_text(), metadata={"page": i + 1}))
+        return raw_knowledge_base
+
+    def split_document_into_chunks(self, raw_knowledge_base: list[Document]) -> list[Document]:
+        text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
+            self.tokenizer,
+            chunk_size=self.chunk_size_in_tokens,
+            chunk_overlap=int(self.chunk_size_in_tokens / 10),
+            add_start_index=True,
+            strip_whitespace=True,
+            separators=["\n\n", "\n", ".", " "],
+        )
+        print("at text splitting...")
+        chunks = text_splitter.split_documents(raw_knowledge_base)
+        return chunks
+
+    def calculate_chunk_ids(self, chunks: list[Document]) -> list[Document]:
+        # This will create IDs like "file_name.pdf:6:2"
+        # Page Source : Page Number : Chunk Index
+        print(f"calculating chunk ids...")
+        last_page_id = None
+        current_chunk_index = 0
+        for chunk in chunks:
+            page = chunk.metadata.get("page")
+            current_page_id = f"{page}"
+
+            # If the page ID is the same as the last one, increment the index.
+            if current_page_id == last_page_id:
+                current_chunk_index += 1
+            else:
+                current_chunk_index = 0
+
+            # Calculate the chunk ID.
+            chunk_id = f"page:{current_page_id}&chunk:{current_chunk_index}"
+            last_page_id = current_page_id
+
+            # Add it to the page meta-data.
+            chunk.metadata["id"] = chunk_id
+
+        return chunks
+
+    def create_vector_db_from_pdf(self, file: TemporaryUploadedFile | InMemoryUploadedFile):
+        raw_knowledge_base: list[Document] = self.convert_to_document(file)
+        chunks: list[Document] = self.split_document_into_chunks(raw_knowledge_base)
+        chunks = self.calculate_chunk_ids(chunks)
+        print("creating vector db...")
+        self.vector_db = FAISS.from_documents(
+            chunks, self.embedding_model, distance_strategy=DistanceStrategy.COSINE
+        )
+
+    def answer_with_rag(self, question: str, num_retrieved_docs: int = 5) -> str:
+        print("=> Retrieving documents...")
+        relevant_docs = self.vector_db.similarity_search(query=question, k=num_retrieved_docs)
+
+        # Build the final prompt
+        context = "\nExtracted documents:\n"
+        context += "".join([f"Source: {doc.metadata["id"]}:::\n" + doc.page_content for doc in relevant_docs])
+
+        final_prompt = self.rag_prompt_template.format(question=question, context=context)
+
+        print("=> Generating answer...")
+        answer = genai.GenerativeModel("gemini-2.5-pro").generate_content(final_prompt)
+
+        return answer.text
+
+
 
 class ChatBot():
     def __init__(self) -> None:
@@ -149,7 +272,7 @@ Question: {question}""",
         return answer
 
 if not UNIT_TESTING:
-    chatbot = ChatBot()
+    chatbot = ChatBotCloud()
 
 def chatbot_is_file_uploaded() -> bool:
     if UNIT_TESTING:

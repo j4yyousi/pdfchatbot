@@ -47,3 +47,6 @@ Handles chat interactions between the user and the chatbot. Accepts a user's que
   Redirects to the `/` endpoint after processing the chat input.
 - **405 Method Not Allowed**  
   If the request method is not `POST`.
+
+## References
+https://huggingface.co/learn/cookbook/en/advanced_rag
