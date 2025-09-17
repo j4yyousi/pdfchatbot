@@ -48,8 +48,11 @@ Handles chat interactions between the user and the chatbot. Accepts a user's que
 - **405 Method Not Allowed**  
   If the request method is not `POST`.
 
-## Env Params
+## tradeoffs
 I chose the embeddigns to be on device while llm on cloud since its too big in size and requires gpu.
+Without tokenizer the performence gets worse.
+
+Tested on PDFs of 300*50 = 15k characters
 
 ## Env Params
 to unit test:

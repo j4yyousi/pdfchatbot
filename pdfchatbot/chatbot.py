@@ -1,9 +1,7 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import CharacterTextSplitter
 from langchain.schema.document import Document
 from langchain_community.vectorstores import FAISS, VectorStore
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores.utils import DistanceStrategy
-from transformers import AutoTokenizer, PreTrainedTokenizerBase
 from django.core.files.uploadedfile import TemporaryUploadedFile , InMemoryUploadedFile
 from PyPDF2 import PdfReader
 from .settings import UNIT_TESTING
@@ -11,6 +9,7 @@ from google import genai
 from google.genai import types
 import logging
 import os
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 logger = logging.getLogger(__name__)
 
@@ -18,16 +17,16 @@ class VectorDb():
     def __init__(self) -> None:
         self.file_name: str = ""
         self.vector_db: VectorStore
-        self.chunk_size_in_tokens: int = 200
-        READER_MODEL_NAME = "HuggingFaceH4/zephyr-7b-beta"
-        EMBEDDING_MODEL_NAME = "thenlper/gte-small"
-        logger.info("loading tokenizer...")
-        self.tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(READER_MODEL_NAME)
-        logger.info("loading embedding model...")
-        self.embedding_model = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME,
-        multi_process=True,
-        encode_kwargs={"normalize_embeddings": True},
+        self.chunk_size_in_chars: int = 300
+        self.text_size = 0
+        #gemini embeddings has 30,000 TPM and 100 RPM limits
+        self.NUM_OF_FREE_TIER_VECTORS = 50 # on a fresh key this number works
+        EMBEDDING_MODEL_NAME = os.environ.get("EMBEDDING_MODEL_NAME")
+        logger.info(f"loading embedding model... {EMBEDDING_MODEL_NAME}")
+        self.embedding_model = GoogleGenerativeAIEmbeddings(
+            model=EMBEDDING_MODEL_NAME,
+            task_type="RETRIEVAL_DOCUMENT",
+            google_api_key=os.environ.get("GEMINI_API_KEY")
         )
 
     def is_file_uploaded(self) -> bool:
@@ -35,24 +34,33 @@ class VectorDb():
 
     def convert_to_document(self, file: TemporaryUploadedFile | InMemoryUploadedFile) -> list[Document]:
         raw_knowledge_base: list[Document] = []
+        text = ""
         self.file_name = file.name
         reader = PdfReader(file)
         for i in range(len(reader.pages)):
+            text += reader.pages[i].extract_text()
             raw_knowledge_base.append(Document(page_content=reader.pages[i].extract_text(), metadata={"page": i + 1}))
+        self.text_size = len(text)
+        logger.info(f"length of {self.file_name} = {self.text_size} characters.")
         return raw_knowledge_base
 
     def split_document_into_chunks(self, raw_knowledge_base: list[Document]) -> list[Document]:
-        text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
-            self.tokenizer,
-            chunk_size=self.chunk_size_in_tokens,
-            chunk_overlap=int(self.chunk_size_in_tokens / 10),
+        """text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=self.chunk_size_in_chars,
+            chunk_overlap=int(self.chunk_size_in_chars * 0.05),
             add_start_index=True,
             strip_whitespace=True,
-            separators=["\n\n", "\n", ".", " "],
+            separators=["\n\n"],
+        )"""
+        text_splitter = CharacterTextSplitter(
+            chunk_size=self.chunk_size_in_chars,
+            chunk_overlap=int(self.chunk_size_in_chars * 0.05),
+            add_start_index=True,
+            strip_whitespace=True,
         )
         logger.info("at text splitting...")
         chunks = text_splitter.split_documents(raw_knowledge_base)
-        return chunks
+        return chunks[:self.NUM_OF_FREE_TIER_VECTORS]
 
     def calculate_chunk_ids(self, chunks: list[Document]) -> list[Document]:
         # This will create IDs like "file_name.pdf:6:2"
@@ -83,10 +91,17 @@ class VectorDb():
         raw_knowledge_base: list[Document] = self.convert_to_document(file)
         chunks: list[Document] = self.split_document_into_chunks(raw_knowledge_base)
         chunks = self.calculate_chunk_ids(chunks)
-        logger.info("creating vector db...")
-        self.vector_db = FAISS.from_documents(
-            chunks, self.embedding_model, distance_strategy=DistanceStrategy.COSINE
-        )
+        logger.info(f"creating vector db...")
+        try:
+            self.vector_db = FAISS.from_documents(
+                chunks,
+                self.embedding_model,
+                distance_strategy=DistanceStrategy.COSINE
+            )
+            logger.info(f"vector db created")
+        except Exception as e:
+            self.file_name = ""
+            logger.info("Unexpected error when creating vector_db:", e)
 
 class ChatBotCloud(VectorDb):
     def __init__(self):
@@ -142,24 +157,20 @@ if not UNIT_TESTING:
 def chatbot_is_file_uploaded() -> bool:
     if UNIT_TESTING:
         return False
-    global chatbot
     return chatbot.is_file_uploaded()
 
 def chatbot_get_file_name() -> str:
     if UNIT_TESTING:
         return "test.pdf"
-    global chatbot
     return chatbot.file_name
 
 def chatbot_process_pdf(file: TemporaryUploadedFile | InMemoryUploadedFile) -> None:
     if UNIT_TESTING:
         return
-    global chatbot
     chatbot.create_vector_db_from_pdf(file)
 
 def chatbot_answer(question: str) -> str:
     if UNIT_TESTING:
         return "test answer"
-    global chatbot
     answer = chatbot.answer_with_rag(question)
     return answer
