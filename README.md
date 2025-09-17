@@ -49,6 +49,9 @@ Handles chat interactions between the user and the chatbot. Accepts a user's que
   If the request method is not `POST`.
 
 ## Env Params
+I chose the embeddigns to be on device while llm on cloud since its too big in size and requires gpu.
+
+## Env Params
 to unit test:
 UNIT_TESTING=TRUE ./manage.py test
 

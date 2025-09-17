@@ -3,24 +3,30 @@ from langchain.schema.document import Document
 from langchain_community.vectorstores import FAISS, VectorStore
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores.utils import DistanceStrategy
+from transformers import AutoTokenizer, PreTrainedTokenizerBase
 from django.core.files.uploadedfile import TemporaryUploadedFile , InMemoryUploadedFile
 from PyPDF2 import PdfReader
 from .settings import UNIT_TESTING
 from google import genai
 from google.genai import types
+import logging
+import os
+
+logger = logging.getLogger(__name__)
 
 class VectorDb():
     def __init__(self) -> None:
         self.file_name: str = ""
         self.vector_db: VectorStore
-        self.chunk_size_in_chars: int = 200
-
+        self.chunk_size_in_tokens: int = 200
+        READER_MODEL_NAME = "HuggingFaceH4/zephyr-7b-beta"
         EMBEDDING_MODEL_NAME = "thenlper/gte-small"
-        print("loading embedding model...")
+        logger.info("loading tokenizer...")
+        self.tokenizer: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(READER_MODEL_NAME)
+        logger.info("loading embedding model...")
         self.embedding_model = HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL_NAME,
         multi_process=True,
-        #model_kwargs={"device": "cuda"},
         encode_kwargs={"normalize_embeddings": True},
         )
 
@@ -36,21 +42,22 @@ class VectorDb():
         return raw_knowledge_base
 
     def split_document_into_chunks(self, raw_knowledge_base: list[Document]) -> list[Document]:
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=self.chunk_size_in_chars,
-            chunk_overlap=int(self.chunk_size_in_chars / 10),
+        text_splitter = RecursiveCharacterTextSplitter.from_huggingface_tokenizer(
+            self.tokenizer,
+            chunk_size=self.chunk_size_in_tokens,
+            chunk_overlap=int(self.chunk_size_in_tokens / 10),
             add_start_index=True,
             strip_whitespace=True,
             separators=["\n\n", "\n", ".", " "],
         )
-        print("at text splitting...")
+        logger.info("at text splitting...")
         chunks = text_splitter.split_documents(raw_knowledge_base)
         return chunks
 
     def calculate_chunk_ids(self, chunks: list[Document]) -> list[Document]:
         # This will create IDs like "file_name.pdf:6:2"
         # Page Source : Page Number : Chunk Index
-        print(f"calculating chunk ids...")
+        logger.info(f"calculating chunk ids...")
         last_page_id = None
         current_chunk_index = 0
         for chunk in chunks:
@@ -76,7 +83,7 @@ class VectorDb():
         raw_knowledge_base: list[Document] = self.convert_to_document(file)
         chunks: list[Document] = self.split_document_into_chunks(raw_knowledge_base)
         chunks = self.calculate_chunk_ids(chunks)
-        print("creating vector db...")
+        logger.info("creating vector db...")
         self.vector_db = FAISS.from_documents(
             chunks, self.embedding_model, distance_strategy=DistanceStrategy.COSINE
         )
@@ -85,14 +92,16 @@ class ChatBotCloud(VectorDb):
     def __init__(self):
         super().__init__()
         self.llm_client = genai.Client()
+        self.LLM_MODEL_NAME = os.environ.get('LLM_MODEL_NAME')
+        logger.info(f"LLM_MODEL_NAME = {self.LLM_MODEL_NAME}")
 
     def build_context(self, question: str, num_docs: int = 5):
-        print("=> Retrieving documents...")
+        logger.info("=> Retrieving chunks...")
         relevant_docs = self.vector_db.similarity_search(query=question, k=num_docs)
 
         # Build the final prompt
-        context = "\nExtracted documents:\n"
-        context += "".join([f"Source: {doc.metadata["id"]}\n" + doc.page_content for doc in relevant_docs])
+        context = f"\nExtracted chunks from {self.file_name}:\n"
+        context += "".join([f"\n\nSource: {doc.metadata["id"]}\n" + doc.page_content for doc in relevant_docs])
         return context
 
     def build_user_prompt(self, question: str):
@@ -112,19 +121,19 @@ give a comprehensive answer to the question.
 Respond only to the question asked, response should be short and relevant to the question.
 If the answer cannot be deduced from the context, do not give an answer."""
         user_prompt = self.build_user_prompt(question)
-
-        print("=> Generating answer...")
+        logger.info(f"user_prompt = {user_prompt}")
+        logger.info("=> Generating answer...")
         try:
             answer = self.llm_client.models.generate_content(
-                model="gemini-2.5-pro",
+                model=self.LLM_MODEL_NAME,
                 config=types.GenerateContentConfig(
                     system_instruction=system_prompt),
                 contents=user_prompt,
             )
         except Exception as e:
-            print("Unexpected error:", e)
+            logger.info("Unexpected error:", e)
             return f"Could not get answer from remote LLM. Error message: {e}"
-
+        logger.info(f"llm answer.text = {answer.text}")
         return answer.text
 
 if not UNIT_TESTING:
