@@ -48,5 +48,12 @@ Handles chat interactions between the user and the chatbot. Accepts a user's que
 - **405 Method Not Allowed**  
   If the request method is not `POST`.
 
+## Env Params
+to unit test:
+UNIT_TESTING=TRUE ./manage.py test
+
+gemini model name
+api_key
+device
 ## References
 https://huggingface.co/learn/cookbook/en/advanced_rag
