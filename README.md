@@ -1,3 +1,7 @@
+## Description
+
+PDF Q&A chatbot implemented using Django, Langchain, and retrieval-augmented generation (RAG) via google Gemini. Limit file inputs to PDFs of 15k characters if you're going to use Gemini free tier token and not going to change any paramters in the VectorDb class.
+
 ## How To Install
 Assuming you have docker, git and running Ubunbtu, run:  
 `git clone https://github.com/j4yyousi/pdfchatbot.git && cd pdfchatbot`  
