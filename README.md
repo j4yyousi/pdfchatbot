@@ -1,4 +1,16 @@
 ## How To Install
+In Docker setup file:  
+gemini llm model name  
+gemini embeddings model name  
+gemini api_key
+## Project Architecture
+
+![Project Architecture Diagram](media/RAG_workflow.png)
+[Diagram taken from here](https://huggingface.co/learn/cookbook/en/advanced_rag9)
+
+## Demo
+
+
 
 ## API Documentation
 
@@ -55,13 +67,15 @@ Without tokenizer the performence gets worse.
 Tested on PDFs of 300*50 = 15k characters
 
 ## Some Useful Commands
-### to unit test:
-`UNIT_TESTING=TRUE ./manage.py test`
 
-In Docker setup file:  
-gemini llm model name  
-gemini embeddings model name  
-gemini api_key
+to unit test: `UNIT_TESTING=TRUE ./manage.py test`
+
+## Future work
+1. [Test chatbot by building an evaluation system](https://huggingface.co/learn/cookbook/en/rag_evaluation) 
+1. Using the evaluation system, try other free models from HuggingFace
+1. Using the evaluation system, fine tune the RAG system via the paramters shown in the diagram above.
 
 ## References
 https://huggingface.co/learn/cookbook/en/advanced_rag
+https://huggingface.co/spaces/mteb/leaderboard
+https://ai.google.dev/gemini-api/docs
