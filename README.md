@@ -1,4 +1,4 @@
-## Install Instructions
+## How To Install
 
 ## API Documentation
 
@@ -54,12 +54,14 @@ Without tokenizer the performence gets worse.
 
 Tested on PDFs of 300*50 = 15k characters
 
-## Env Params
-to unit test:
-UNIT_TESTING=TRUE ./manage.py test
+## Some Useful Commands
+### to unit test:
+`UNIT_TESTING=TRUE ./manage.py test`
 
-gemini model name
-api_key
-device
+In Docker setup file:  
+gemini llm model name  
+gemini embeddings model name  
+gemini api_key
+
 ## References
 https://huggingface.co/learn/cookbook/en/advanced_rag
