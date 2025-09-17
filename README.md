@@ -1,5 +1,7 @@
 ## How To Install
-Assuming you have docker, git and runing Ubunbtu, ``git clone` this repository then `cd` to project directory and run the following command, make sure `GEMINI_API_KEY` is set to your key:
+Assuming you have docker, git and running Ubunbtu, run:  
+`git clone https://github.com/j4yyousi/pdfchatbot.git && cd pdfchatbot`  
+Then run the following command, make sure `GEMINI_API_KEY` is set to your key:
 
 ```
 sudo docker build -t pdfchatbot . && sudo docker run \
@@ -12,6 +14,9 @@ sudo docker build -t pdfchatbot . && sudo docker run \
   -it pdfchatbot
 ```
 You can get a [gemini api key from here.](https://ai.google.dev/gemini-api/docs/quickstart)
+
+Then paste the following address in your web browser `http://0.0.0.0:8000`.
+
 ## Project Architecture
 
 ![Project Architecture Diagram](media/RAG_workflow.png)
